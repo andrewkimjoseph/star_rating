@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:get/get.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,7 +10,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -29,7 +30,7 @@ class RatingScreen extends StatefulWidget {
 }
 
 class _RatingScreenState extends State<RatingScreen> {
-  double ratingValue = 0;
+  RxDouble ratingValueRxDouble = 0.0.obs;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,34 +45,35 @@ class _RatingScreenState extends State<RatingScreen> {
               'Your Rating:',
             ),
             const SizedBox(height: 25),
-            RatingBar.builder(
-              initialRating: ratingValue,
-              minRating: 1,
-              direction: Axis.horizontal,
-              allowHalfRating: false,
-              itemCount: 5,
-              itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-              itemBuilder: (context, _) => const Icon(
-                Icons.star,
-                color: Colors.amber,
+            Obx(
+              () => RatingBar.builder(
+                initialRating: ratingValueRxDouble.value,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: false,
+                itemCount: 5,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (value) {
+                  ratingValueRxDouble.value = value;
+                  print(ratingValueRxDouble.value);
+                },
               ),
-              onRatingUpdate: (ratingValue) {
-                // print(ratingValue);
-              },
             ),
             const SizedBox(height: 25),
-            Slider(
-              value: ratingValue,
-              max: 5,
-              divisions: 5,
-              label: ratingValue.round().toString(),
-              onChanged: (double value) {
-                setState(() {
-                  ratingValue = value;
-                  // print(ratingValue);
-                });
-              },
-            ),
+            Obx((() => Slider.adaptive(
+                  value: ratingValueRxDouble.value,
+                  max: 5,
+                  divisions: 5,
+                  label: ratingValueRxDouble.round().toString(),
+                  onChanged: (double value) {
+                    ratingValueRxDouble.value = value;
+                    print(ratingValueRxDouble.value);
+                  },
+                )))
           ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
